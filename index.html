@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Online Examination Portal — Request Scheduler</title>
+<meta name="description" content="Smart Online Examination Request Scheduler — OS CPU Scheduling Simulator comparing FCFS and Round Robin algorithms for student exam requests.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+/* ===== CSS RESET & BASE ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 14px; }
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #f0f2f5;
+  color: #1e293b;
+  display: flex;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  width: 220px;
+  min-width: 220px;
+  background: linear-gradient(180deg, #1a2332 0%, #0f172a 100%);
+  color: #94a3b8;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  z-index: 100;
+  overflow-y: auto;
+}
+.sidebar-brand {
+  padding: 20px 18px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.sidebar-logo {
+  width: 40px; height: 40px;
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; color: #fff;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(37,99,235,0.4);
+}
+.sidebar-brand-text h2 {
+  font-size: 13px; font-weight: 700; color: #f1f5f9;
+  line-height: 1.3;
+}
+.sidebar-brand-text span {
+  font-size: 10.5px; color: #64748b; font-weight: 500;
+}
+.sidebar-nav { padding: 12px 10px; flex: 1; }
+.sidebar-nav a {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px;
+  color: #94a3b8;
+  text-decoration: none;
+  font-size: 13px; font-weight: 500;
+  border-radius: 8px;
+  margin-bottom: 2px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.sidebar-nav a:hover { background: rgba(255,255,255,0.06); color: #e2e8f0; }
+.sidebar-nav a.active {
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(37,99,235,0.3);
+}
+.sidebar-nav a .nav-icon {
+  width: 20px; height: 20px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+}
+.sidebar-status {
+  padding: 16px 18px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  display: flex; align-items: center; gap: 8px;
+  font-size: 11.5px;
+}
+.status-dot {
+  width: 8px; height: 8px;
+  background: #22c55e;
+  border-radius: 50%;
+  animation: pulse-green 2s ease-in-out infinite;
+}
+@keyframes pulse-green {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.4); }
+  50% { box-shadow: 0 0 0 6px rgba(34,197,94,0); }
+}
+.sidebar-status span { color: #64748b; }
+.sidebar-status strong { color: #22c55e; font-weight: 600; font-size: 11px; display: block; }
+
+/* ===== MAIN CONTENT ===== */
+.main-wrapper {
+  margin-left: 220px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ===== TOP HEADER ===== */
+.top-header {
+  background: #fff;
+  padding: 12px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #e2e8f0;
+  position: sticky; top: 0; z-index: 50;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.top-header-left h1 {
+  font-size: 17px; font-weight: 700; color: #0f172a;
+}
+.top-header-left p {
+  font-size: 11.5px; color: #64748b; font-weight: 500;
+}
+.top-header-right {
+  display: flex; align-items: center; gap: 16px;
+}
+.header-icon {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  cursor: pointer;
+  position: relative;
+  background: #f1f5f9;
+  color: #64748b;
+  transition: all 0.2s;
+}
+.header-icon:hover { background: #e2e8f0; color: #334155; }
+.notif-badge {
+  position: absolute;
+  top: 4px; right: 4px;
+  width: 16px; height: 16px;
+  background: #ef4444;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 9px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid #fff;
+}
+.header-divider {
+  width: 1px; height: 28px;
+  background: #e2e8f0;
+}
+.user-profile {
+  display: flex; align-items: center; gap: 10px;
+  cursor: pointer;
+}
+.user-avatar {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-weight: 700; font-size: 14px;
+}
+.user-info strong {
+  font-size: 12.5px; font-weight: 600; color: #0f172a; display: block;
+}
+.user-info span {
+  font-size: 11px; color: #64748b; font-weight: 500;
+}
+
+/* ===== CONTENT AREA ===== */
+.content { padding: 20px 24px 32px; flex: 1; }
+
+/* ===== SUMMARY CARDS ===== */
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+  margin-bottom: 18px;
+}
+.summary-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 18px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04), 0 2px 8px rgba(0,0,0,0.02);
+  border: 1px solid #f1f5f9;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.summary-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+}
+.card-icon {
+  width: 46px; height: 46px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+.card-icon.blue { background: #eff6ff; color: #2563eb; }
+.card-icon.orange { background: #fff7ed; color: #ea580c; }
+.card-icon.purple { background: #f5f3ff; color: #7c3aed; }
+.card-icon.cyan { background: #ecfeff; color: #0891b2; }
+.card-icon.green { background: #f0fdf4; color: #16a34a; }
+.card-info { flex: 1; min-width: 0; }
+.card-label {
+  font-size: 11.5px; font-weight: 600; color: #64748b;
+  text-transform: uppercase; letter-spacing: 0.3px;
+  margin-bottom: 4px;
+}
+.card-value {
+  font-size: 26px; font-weight: 800; color: #0f172a;
+  line-height: 1.1;
+}
+.card-value.green-text { color: #16a34a; }
+.card-subtitle {
+  font-size: 11px; font-weight: 500;
+  margin-top: 2px;
+}
+.card-subtitle.blue { color: #2563eb; }
+.card-subtitle.orange { color: #ea580c; }
+.card-subtitle.purple { color: #7c3aed; }
+.card-subtitle.cyan { color: #0891b2; }
+.card-subtitle.green { color: #16a34a; }
+
+/* ===== ACTION BUTTONS ===== */
+.action-buttons {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.action-btn {
+  padding: 12px 16px;
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.action-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
+.action-btn:active { transform: translateY(0); }
+.btn-generate { background: linear-gradient(135deg, #2563eb, #3b82f6); }
+.btn-fcfs { background: linear-gradient(135deg, #16a34a, #22c55e); }
+.btn-rr { background: linear-gradient(135deg, #7c3aed, #8b5cf6); }
+.btn-reset { background: linear-gradient(135deg, #dc2626, #ef4444); }
+
+/* ===== TWO COLUMN LAYOUT ===== */
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 18px;
+}
+
+/* ===== PANELS ===== */
+.panel {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04), 0 2px 8px rgba(0,0,0,0.02);
+  border: 1px solid #f1f5f9;
+  overflow: hidden;
+  margin-bottom: 18px;
+}
+.panel-header {
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #f1f5f9;
+}
+.panel-header-left {
+  display: flex; align-items: center; gap: 8px;
+}
+.panel-icon {
+  font-size: 16px; color: #2563eb;
+}
+.panel-title {
+  font-size: 14px; font-weight: 700; color: #0f172a;
+}
+.panel-actions button {
+  background: none; border: none;
+  color: #64748b; cursor: pointer;
+  font-size: 16px; padding: 4px;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+.panel-actions button:hover { background: #f1f5f9; color: #334155; }
+.panel-body { padding: 0; }
+
+/* ===== TABLE ===== */
+.req-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+.req-table thead th {
+  background: #f8fafc;
+  padding: 10px 14px;
+  text-align: left;
+  font-weight: 600;
+  color: #64748b;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  border-bottom: 1px solid #e2e8f0;
+}
+.req-table tbody td {
+  padding: 10px 14px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #334155;
+  font-weight: 500;
+}
+.req-table tbody tr:hover { background: #f8fafc; }
+.req-table tbody tr:last-child td { border-bottom: none; }
+.status-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+.status-badge.running {
+  background: #eff6ff; color: #2563eb;
+}
+.status-badge.waiting {
+  background: #fff7ed; color: #ea580c;
+}
+.status-badge.completed {
+  background: #f0fdf4; color: #16a34a;
+}
+
+/* ===== GANTT CHART ===== */
+.gantt-container { padding: 16px 18px; }
+.gantt-header {
+  display: flex;
+  margin-bottom: 6px;
+  padding-left: 0;
+}
+.gantt-tick {
+  font-size: 10px;
+  color: #94a3b8;
+  font-weight: 500;
+  text-align: center;
+  min-width: 0;
+}
+.gantt-bar-row {
+  display: flex;
+  height: 36px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #f1f5f9;
+  position: relative;
+}
+.gantt-segment {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #fff;
+  transition: all 0.3s;
+  border-right: 1px solid rgba(255,255,255,0.3);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Gantt colors for students */
+.gantt-s1 { background: #22c55e; }
+.gantt-s2 { background: #3b82f6; }
+.gantt-s3 { background: #f97316; }
+.gantt-s4 { background: #a855f7; }
+.gantt-s5 { background: #ef4444; }
+.gantt-s6 { background: #06b6d4; }
+.gantt-s7 { background: #eab308; }
+.gantt-s8 { background: #ec4899; }
+.gantt-s9 { background: #14b8a6; }
+.gantt-s10 { background: #f43f5e; }
+.gantt-idle { background: #cbd5e1; }
+
+/* ===== PERFORMANCE TABLE ===== */
+.perf-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+.perf-table thead th {
+  background: #f8fafc;
+  padding: 10px 14px;
+  text-align: left;
+  font-weight: 600;
+  color: #64748b;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  border-bottom: 1px solid #e2e8f0;
+}
+.perf-table tbody td {
+  padding: 10px 14px;
+  border-bottom: 1px solid #f1f5f9;
+  font-weight: 600;
+}
+.perf-table tbody tr:last-child td { border-bottom: none; }
+.perf-val-red { color: #ea580c; }
+.perf-val-green { color: #16a34a; }
+
+/* ===== READY QUEUE ===== */
+.ready-queue-container {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  min-height: 80px;
+  flex-wrap: nowrap;
+}
+.queue-card {
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 8px 10px;
+  text-align: center;
+  min-width: 72px;
+  flex-shrink: 0;
+  transition: all 0.3s;
+}
+.queue-card:hover { border-color: #2563eb; background: #eff6ff; }
+.queue-card .q-id {
+  font-weight: 700; font-size: 13px; color: #0f172a;
+  margin-bottom: 2px;
+}
+.queue-card .q-type {
+  font-size: 9.5px; color: #64748b; font-weight: 500;
+  white-space: nowrap;
+}
+.queue-arrow {
+  color: #94a3b8; font-size: 16px; flex-shrink: 0; font-weight: 700;
+}
+.queue-more {
+  font-size: 18px; color: #94a3b8; font-weight: 700; flex-shrink: 0;
+  padding: 0 4px;
+}
+
+/* ===== EXECUTION LOG ===== */
+.exec-log {
+  padding: 14px 16px;
+  max-height: 220px;
+  overflow-y: auto;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: 11.5px;
+  line-height: 1.8;
+  background: #fafbfc;
+}
+.log-line {
+  display: flex;
+  gap: 12px;
+  padding: 2px 0;
+}
+.log-time {
+  color: #94a3b8;
+  font-weight: 600;
+  flex-shrink: 0;
+  min-width: 64px;
+}
+.log-msg { color: #475569; }
+.log-msg.log-blue { color: #2563eb; font-weight: 600; }
+.log-msg.log-orange { color: #ea580c; font-weight: 600; }
+.log-msg.log-green { color: #16a34a; font-weight: 600; }
+.log-msg.log-red { color: #dc2626; font-weight: 600; }
+
+/* ===== CLEAR LOG BUTTON ===== */
+.clear-log-btn {
+  background: none;
+  border: none;
+  color: #ef4444;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.2s;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+.clear-log-btn:hover { background: #fef2f2; }
+
+/* ===== CHART ===== */
+.chart-container {
+  padding: 16px;
+  height: 260px;
+  position: relative;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1280px) {
+  .main-grid { grid-template-columns: 1fr 340px; }
+}
+@media (max-width: 1100px) {
+  .main-grid { grid-template-columns: 1fr; }
+  .summary-cards { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .main-wrapper { margin-left: 0; }
+  .summary-cards { grid-template-columns: repeat(2, 1fr); }
+  .action-buttons { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-in { animation: fadeInUp 0.4s ease-out; }
+</style>
+</head>
+<body>
+
+<!-- ===== SIDEBAR ===== -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="sidebar-logo">🎓</div>
+    <div class="sidebar-brand-text">
+      <h2>Smart Online Examination Portal</h2>
+      <span>Request Scheduler</span>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <a class="active" id="nav-dashboard"><span class="nav-icon">📊</span> Dashboard</a>
+    <a id="nav-requests"><span class="nav-icon">📋</span> Requests</a>
+    <a id="nav-scheduler"><span class="nav-icon">⚙️</span> Scheduler</a>
+    <a id="nav-results"><span class="nav-icon">📈</span> Results</a>
+    <a id="nav-analytics"><span class="nav-icon">📉</span> Analytics</a>
+    <a id="nav-settings"><span class="nav-icon">🔧</span> Settings</a>
+    <a id="nav-about"><span class="nav-icon">ℹ️</span> About</a>
+  </nav>
+  <div class="sidebar-status">
+    <div class="status-dot"></div>
+    <div>
+      <span>System Status</span>
+      <strong>All Systems Operational</strong>
+    </div>
+  </div>
+</aside>
+
+<!-- ===== MAIN WRAPPER ===== -->
+<div class="main-wrapper">
+
+  <!-- ===== TOP HEADER ===== -->
+  <header class="top-header">
+    <div class="top-header-left">
+      <h1>Smart Online Examination</h1>
+      <p>Request Scheduler</p>
+    </div>
+    <div class="top-header-right">
+      <div class="header-icon" id="btn-notification" title="Notifications">
+        🔔
+        <span class="notif-badge">3</span>
+      </div>
+      <div class="header-icon" id="btn-help" title="Help">❓</div>
+      <div class="header-divider"></div>
+      <div class="user-profile">
+        <div class="user-avatar">AU</div>
+        <div class="user-info">
+          <strong>Admin User</strong>
+          <span>Administrator</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== CONTENT ===== -->
+  <main class="content">
+
+    <!-- SUMMARY CARDS -->
+    <section class="summary-cards animate-in" id="summary-cards">
+      <div class="summary-card">
+        <div class="card-icon blue">👥</div>
+        <div class="card-info">
+          <div class="card-label">Active Students</div>
+          <div class="card-value" id="card-active-students">7</div>
+          <div class="card-subtitle blue">Requests in system</div>
+        </div>
+      </div>
+      <div class="summary-card">
+        <div class="card-icon orange">📝</div>
+        <div class="card-info">
+          <div class="card-label">Queue Length</div>
+          <div class="card-value" id="card-queue-length">7</div>
+          <div class="card-subtitle orange">Requests waiting</div>
+        </div>
+      </div>
+      <div class="summary-card">
+        <div class="card-icon purple">⚙️</div>
+        <div class="card-info">
+          <div class="card-label">Current Mode</div>
+          <div class="card-value" id="card-current-mode" style="font-size:20px;">Round Robin</div>
+          <div class="card-subtitle purple">Scheduling Algorithm</div>
+        </div>
+      </div>
+      <div class="summary-card">
+        <div class="card-icon cyan">⏱️</div>
+        <div class="card-info">
+          <div class="card-label">Time Quantum</div>
+          <div class="card-value" id="card-time-quantum">2</div>
+          <div class="card-subtitle cyan">Time Units</div>
+        </div>
+      </div>
+      <div class="summary-card">
+        <div class="card-icon green">🖥️</div>
+        <div class="card-info">
+          <div class="card-label">CPU Status</div>
+          <div class="card-value green-text" id="card-cpu-status">Idle</div>
+          <div class="card-subtitle green">Processing requests</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ACTION BUTTONS -->
+    <section class="action-buttons animate-in">
+      <button class="action-btn btn-generate" id="btn-generate" onclick="generateRequests()">
+        <span>+</span> Generate Requests
+      </button>
+      <button class="action-btn btn-fcfs" id="btn-fcfs" onclick="runFCFS()">
+        <span>▶</span> Run FCFS (Baseline)
+      </button>
+      <button class="action-btn btn-rr" id="btn-rr" onclick="runRoundRobin()">
+        <span>▶</span> Run Round Robin
+      </button>
+      <button class="action-btn btn-reset" id="btn-reset" onclick="resetSystem()">
+        <span>↺</span> Reset System
+      </button>
+    </section>
+
+    <!-- MAIN GRID -->
+    <div class="main-grid">
+
+      <!-- LEFT COLUMN -->
+      <div class="left-column">
+
+        <!-- Student Requests Table -->
+        <div class="panel animate-in" id="panel-requests">
+          <div class="panel-header">
+            <div class="panel-header-left">
+              <span class="panel-icon">📋</span>
+              <span class="panel-title">Student Requests</span>
+            </div>
+            <div class="panel-actions">
+              <button title="More options">⋮</button>
+            </div>
+          </div>
+          <div class="panel-body">
+            <table class="req-table" id="requests-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Student ID</th>
+                  <th>Request Type</th>
+                  <th>Arrival Time</th>
+                  <th>Burst Time</th>
+                  <th>Remaining Time</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="requests-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Gantt Chart -->
+        <div class="panel animate-in" id="panel-gantt">
+          <div class="panel-header">
+            <div class="panel-header-left">
+              <span class="panel-icon">📊</span>
+              <span class="panel-title">Gantt Chart / Execution Timeline</span>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="gantt-container" id="gantt-container">
+              <div class="gantt-header" id="gantt-header"></div>
+              <div class="gantt-bar-row" id="gantt-bar-row"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Performance Comparison -->
+        <div class="panel animate-in" id="panel-performance">
+          <div class="panel-header">
+            <div class="panel-header-left">
+              <span class="panel-icon">📈</span>
+              <span class="panel-title">Performance Comparison</span>
+            </div>
+          </div>
+          <div class="panel-body">
+            <table class="perf-table" id="perf-table">
+              <thead>
+                <tr>
+                  <th>Algorithm</th>
+                  <th>Average Waiting Time</th>
+                  <th>Average Turnaround Time</th>
+                  <th>CPU Utilization</th>
+                  <th>Throughput</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr id="perf-fcfs-row">
+                  <td style="font-weight:700;">FCFS (Baseline)</td>
+                  <td class="perf-val-red" id="perf-fcfs-awt">—</td>
+                  <td class="perf-val-red" id="perf-fcfs-att">—</td>
+                  <td class="perf-val-red" id="perf-fcfs-cpu">—</td>
+                  <td class="perf-val-red" id="perf-fcfs-tp">—</td>
+                </tr>
+                <tr id="perf-rr-row">
+                  <td style="font-weight:700;">Round Robin</td>
+                  <td class="perf-val-green" id="perf-rr-awt">—</td>
+                  <td class="perf-val-green" id="perf-rr-att">—</td>
+                  <td class="perf-val-green" id="perf-rr-cpu">—</td>
+                  <td class="perf-val-green" id="perf-rr-tp">—</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div><!-- /left-column -->
+
+      <!-- RIGHT COLUMN -->
+      <div class="right-column">
+
+        <!-- Ready Queue -->
+        <div class="panel animate-in" id="panel-ready-queue">
+          <div class="panel-header">
+            <div class="panel-header-left">
+              <span class="panel-icon">📦</span>
+              <span class="panel-title">Ready Queue</span>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="ready-queue-container" id="ready-queue-container">
+              <!-- filled by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Execution Log -->
+        <div class="panel animate-in" id="panel-exec-log">
+          <div class="panel-header">
+            <div class="panel-header-left">
+              <span class="panel-icon">📝</span>
+              <span class="panel-title">Execution Log</span>
+            </div>
+            <div class="panel-actions">
+              <button class="clear-log-btn" onclick="clearLog()">🗑️ Clear Log</button>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="exec-log" id="exec-log"></div>
+          </div>
+        </div>
+
+        <!-- Waiting Time Comparison Chart -->
+        <div class="panel animate-in" id="panel-chart">
+          <div class="panel-header">
+            <div class="panel-header-left">
+              <span class="panel-icon">📊</span>
+              <span class="panel-title">Waiting Time Comparison</span>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="chart-container">
+              <canvas id="comparison-chart"></canvas>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /right-column -->
+
+    </div><!-- /main-grid -->
+
+  </main>
+</div>
+
+<!-- ===== JAVASCRIPT ===== -->
+<script>
+// =========================================================
+// DATA MODEL — follows CODING_GUARDRAILS.md exactly
+// =========================================================
+const REQUEST_TYPES = ['Login', 'Save Answer', 'Submit Exam', 'Fetch Question', 'Auto Save', 'Load Paper'];
+
+const GANTT_COLORS = [
+  '#22c55e', '#3b82f6', '#f97316', '#a855f7', '#ef4444',
+  '#06b6d4', '#eab308', '#ec4899', '#14b8a6', '#f43f5e'
+];
+
+// Default sample data
+function getDefaultRequests() {
+  return [
+    { id: 'S1', student_name: 'Student 1', request_type: 'Login',          arrival_time: 0, burst_time: 4, remaining_time: 4, start_time: null, completion_time: null, waiting_time: null, turnaround_time: null, status: 'Waiting' },
+    { id: 'S2', student_name: 'Student 2', request_type: 'Save Answer',    arrival_time: 1, burst_time: 7, remaining_time: 7, start_time: null, completion_time: null, waiting_time: null, turnaround_time: null, status: 'Waiting' },
+    { id: 'S3', student_name: 'Student 3', request_type: 'Submit Exam',    arrival_time: 2, burst_time: 2, remaining_time: 2, start_time: null, completion_time: null, waiting_time: null, turnaround_time: null, status: 'Waiting' },
+    { id: 'S4', student_name: 'Student 4', request_type: 'Fetch Question', arrival_time: 3, burst_time: 6, remaining_time: 6, start_time: null, completion_time: null, waiting_time: null, turnaround_time: null, status: 'Waiting' },
+    { id: 'S5', student_name: 'Student 5', request_type: 'Auto Save',      arrival_time: 4, burst_time: 3, remaining_time: 3, start_time: null, completion_time: null, waiting_time: null, turnaround_time: null, status: 'Waiting' },
+    { id: 'S6', student_name: 'Student 6', request_type: 'Save Answer',    arrival_time: 5, burst_time: 5, remaining_time: 5, start_time: null, completion_time: null, waiting_time: null, turnaround_time: null, status: 'Waiting' },
+    { id: 'S7', student_name: 'Student 7', request_type: 'Load Paper',     arrival_time: 6, burst_time: 4, remaining_time: 4, start_time: null, completion_time: null, waiting_time: null, turnaround_time: null, status: 'Waiting' },
+  ];
+}
+
+let requests = [];
+let fcfsResults = null;
+let rrResults = null;
+let comparisonChart = null;
+let executionLog = [];
+let currentTime = 0;
+
+// =========================================================
+// INITIALIZATION
+// =========================================================
+function init() {
+  requests = getDefaultRequests();
+  renderTable();
+  renderReadyQueue();
+  renderDefaultLog();
+  renderGanttChart([]);
+  updateSummaryCards();
+  initComparisonChart();
+}
+
+// =========================================================
+// RENDER: Student Requests Table
+// =========================================================
+function renderTable() {
+  const tbody = document.getElementById('requests-tbody');
+  tbody.innerHTML = '';
+  requests.forEach((r, i) => {
+    const tr = document.createElement('tr');
+    tr.setAttribute('data-id', r.id);
+    tr.innerHTML = `
+      <td>${i + 1}</td>
+      <td>${r.id}</td>
+      <td>${r.request_type}</td>
+      <td>${r.arrival_time}</td>
+      <td>${r.burst_time}</td>
+      <td>${r.remaining_time}</td>
+      <td><span class="status-badge ${r.status.toLowerCase()}">${r.status}</span></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// =========================================================
+// RENDER: Ready Queue
+// =========================================================
+function renderReadyQueue(queue) {
+  const container = document.getElementById('ready-queue-container');
+  container.innerHTML = '';
+  const items = queue || requests.filter(r => r.status === 'Waiting' || r.status === 'Running');
+  const maxShow = 6;
+  items.slice(0, maxShow).forEach((r, i) => {
+    if (i > 0) {
+      const arrow = document.createElement('span');
+      arrow.className = 'queue-arrow';
+      arrow.textContent = '→';
+      container.appendChild(arrow);
+    }
+    const card = document.createElement('div');
+    card.className = 'queue-card';
+    card.innerHTML = `<div class="q-id">${r.id}</div><div class="q-type">${r.request_type}</div>`;
+    container.appendChild(card);
+  });
+  if (items.length > maxShow) {
+    const more = document.createElement('span');
+    more.className = 'queue-more';
+    more.textContent = '…';
+    container.appendChild(more);
+  }
+  if (items.length === 0) {
+    container.innerHTML = '<span style="color:#94a3b8;font-size:12px;font-weight:500;">Queue is empty</span>';
+  }
+}
+
+// =========================================================
+// RENDER: Execution Log
+// =========================================================
+function addLogLine(time, message, colorClass) {
+  const timeStr = formatTime(time);
+  executionLog.push({ time: timeStr, message, colorClass: colorClass || '' });
+  renderLog();
+}
+
+function renderLog() {
+  const logEl = document.getElementById('exec-log');
+  logEl.innerHTML = '';
+  executionLog.forEach(entry => {
+    const line = document.createElement('div');
+    line.className = 'log-line';
+    line.innerHTML = `<span class="log-time">${entry.time}</span><span class="log-msg ${entry.colorClass}">${entry.message}</span>`;
+    logEl.appendChild(line);
+  });
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+function clearLog() {
+  executionLog = [];
+  renderLog();
+}
+
+function renderDefaultLog() {
+  executionLog = [];
+  addLogLine(0, 'System initialized. Ready to process requests.', '');
+  addLogLine(0, 'Request S1 added to ready queue.', '');
+  addLogLine(1, 'Request S2 added to ready queue.', '');
+  addLogLine(2, 'Request S3 added to ready queue.', '');
+  addLogLine(3, 'CPU → Executing S1 for 2 time units.', 'log-blue');
+  addLogLine(5, 'Time quantum expired for S1. Moving to end of queue.', 'log-orange');
+}
+
+function formatTime(t) {
+  const h = String(Math.floor(t / 3600)).padStart(2, '0');
+  const m = String(Math.floor((t % 3600) / 60)).padStart(2, '0');
+  const s = String(t % 60).padStart(2, '0');
+  return `${h}:${m}:${s}`;
+}
+
+// =========================================================
+// RENDER: Summary Cards
+// =========================================================
+function updateSummaryCards(mode, cpuStatus) {
+  document.getElementById('card-active-students').textContent = requests.length;
+  document.getElementById('card-queue-length').textContent = requests.filter(r => r.status === 'Waiting' || r.status === 'Running').length;
+  document.getElementById('card-current-mode').textContent = mode || 'Round Robin';
+  document.getElementById('card-cpu-status').textContent = cpuStatus || 'Idle';
+}
+
+// =========================================================
+// RENDER: Gantt Chart (pure CSS flex)
+// =========================================================
+function renderGanttChart(timeline) {
+  const headerEl = document.getElementById('gantt-header');
+  const barRow = document.getElementById('gantt-bar-row');
+
+  // Determine total time
+  let totalTime = 30;
+  if (timeline && timeline.length > 0) {
+    const lastItem = timeline[timeline.length - 1];
+    totalTime = Math.max(30, lastItem.end + 2);
+  }
+
+  // Render tick marks
+  headerEl.innerHTML = '';
+  const tickCount = totalTime + 1;
+  for (let i = 0; i <= totalTime; i += 2) {
+    const tick = document.createElement('span');
+    tick.className = 'gantt-tick';
+    tick.style.flex = '0 0 ' + (2 / totalTime * 100) + '%';
+    tick.textContent = i;
+    headerEl.appendChild(tick);
+  }
+
+  // Render bar segments
+  barRow.innerHTML = '';
+  if (!timeline || timeline.length === 0) {
+    barRow.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;width:100%;color:#94a3b8;font-size:12px;font-weight:500;">No execution data</div>';
+    return;
+  }
+
+  timeline.forEach((seg, i) => {
+    const width = ((seg.end - seg.start) / totalTime) * 100;
+    const div = document.createElement('div');
+    div.className = 'gantt-segment';
+    const idx = parseInt(seg.id.replace('S', '')) - 1;
+    div.style.background = GANTT_COLORS[idx % GANTT_COLORS.length];
+    div.style.width = width + '%';
+    div.textContent = seg.id;
+    div.title = `${seg.id}: ${seg.start} → ${seg.end}`;
+    barRow.appendChild(div);
+  });
+}
+
+// =========================================================
+// RENDER: Performance Table
+// =========================================================
+function updatePerformanceTable(algo, stats) {
+  const prefix = algo === 'fcfs' ? 'perf-fcfs' : 'perf-rr';
+  document.getElementById(`${prefix}-awt`).textContent = stats.average_waiting_time.toFixed(2);
+  document.getElementById(`${prefix}-att`).textContent = stats.average_turnaround_time.toFixed(2);
+  document.getElementById(`${prefix}-cpu`).textContent = stats.cpu_utilization + '%';
+  document.getElementById(`${prefix}-tp`).textContent = stats.throughput.toFixed(2) + ' req/unit';
+}
+
+// =========================================================
+// CHART: Waiting Time Comparison (Chart.js)
+// =========================================================
+function initComparisonChart() {
+  const ctx = document.getElementById('comparison-chart').getContext('2d');
+  if (comparisonChart) comparisonChart.destroy();
+
+  comparisonChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: requests.map(r => r.id),
+      datasets: [
+        {
+          label: 'FCFS (Baseline)',
+          data: requests.map(() => 0),
+          backgroundColor: 'rgba(239, 68, 68, 0.75)',
+          borderColor: '#ef4444',
+          borderWidth: 1,
+          borderRadius: 4,
+        },
+        {
+          label: 'Round Robin',
+          data: requests.map(() => 0),
+          backgroundColor: 'rgba(34, 197, 94, 0.75)',
+          borderColor: '#22c55e',
+          borderWidth: 1,
+          borderRadius: 4,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: {
+            font: { family: 'Inter', size: 11, weight: '600' },
+            usePointStyle: true,
+            pointStyle: 'rectRounded',
+            padding: 14,
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 30,
+          ticks: { font: { family: 'Inter', size: 11 }, color: '#94a3b8' },
+          grid: { color: '#f1f5f9' },
+          title: { display: false }
+        },
+        x: {
+          ticks: { font: { family: 'Inter', size: 11, weight: '600' }, color: '#64748b' },
+          grid: { display: false }
+        }
+      }
+    }
+  });
+}
+
+function updateComparisonChart() {
+  if (!comparisonChart) return;
+
+  const labels = requests.map(r => r.id);
+  const fcfsData = fcfsResults ? fcfsResults.requests.map(r => r.waiting_time || 0) : requests.map(() => 0);
+  const rrData = rrResults ? rrResults.requests.map(r => r.waiting_time || 0) : requests.map(() => 0);
+
+  comparisonChart.data.labels = labels;
+  comparisonChart.data.datasets[0].data = fcfsData;
+  comparisonChart.data.datasets[1].data = rrData;
+
+  // Auto-scale Y axis
+  const maxVal = Math.max(...fcfsData, ...rrData, 10);
+  comparisonChart.options.scales.y.max = Math.ceil(maxVal * 1.3);
+
+  comparisonChart.update();
+}
+
+// =========================================================
+// GENERATE REQUESTS
+// =========================================================
+function generateRequests() {
+  const count = Math.floor(Math.random() * 4) + 7; // 7 to 10
+  requests = [];
+  executionLog = [];
+  fcfsResults = null;
+  rrResults = null;
+  currentTime = 0;
+
+  addLogLine(0, 'System reset. Generating new requests...', 'log-green');
+
+  for (let i = 0; i < count; i++) {
+    const req = {
+      id: `S${i + 1}`,
+      student_name: `Student ${i + 1}`,
+      request_type: REQUEST_TYPES[Math.floor(Math.random() * REQUEST_TYPES.length)],
+      arrival_time: Math.floor(Math.random() * 10),
+      burst_time: Math.floor(Math.random() * 9) + 1,
+      remaining_time: 0,
+      start_time: null,
+      completion_time: null,
+      waiting_time: null,
+      turnaround_time: null,
+      status: 'Waiting'
+    };
+    req.remaining_time = req.burst_time;
+    requests.push(req);
+    addLogLine(req.arrival_time, `Request ${req.id} (${req.request_type}) added to ready queue.`, '');
+  }
+
+  // Sort by arrival time
+  requests.sort((a, b) => a.arrival_time - b.arrival_time);
+
+  renderTable();
+  renderReadyQueue();
+  renderGanttChart([]);
+  updateSummaryCards('—', 'Idle');
+  resetPerformanceTable();
+  initComparisonChart();
+}
+
+function resetPerformanceTable() {
+  ['perf-fcfs-awt','perf-fcfs-att','perf-fcfs-cpu','perf-fcfs-tp',
+   'perf-rr-awt','perf-rr-att','perf-rr-cpu','perf-rr-tp'].forEach(id => {
+    document.getElementById(id).textContent = '—';
+  });
+}
+
+// =========================================================
+// SCHEDULER: FCFS (First Come First Serve) — Baseline
+// =========================================================
+function runFCFS() {
+  // Deep copy requests
+  const procs = requests.map(r => ({ ...r, remaining_time: r.burst_time, start_time: null, completion_time: null, waiting_time: null, turnaround_time: null, status: 'Waiting' }));
+  procs.sort((a, b) => a.arrival_time - b.arrival_time);
+
+  const execution_log = [];
+  const timeline = [];
+  let time = 0;
+
+  executionLog = [];
+  addLogLine(0, '▶ Starting FCFS (Baseline) scheduling...', 'log-green');
+
+  procs.forEach(p => {
+    // Wait for process arrival
+    if (time < p.arrival_time) {
+      timeline.push({ id: 'Idle', start: time, end: p.arrival_time });
+      addLogLine(time, `CPU idle. Waiting for ${p.id} (arrives at t=${p.arrival_time}).`, '');
+      time = p.arrival_time;
+    }
+
+    p.start_time = time;
+    p.status = 'Running';
+    addLogLine(time, `CPU → Executing ${p.id} (${p.request_type}) for ${p.burst_time} time units.`, 'log-blue');
+
+    execution_log.push({ time, event: `Executing ${p.id}`, id: p.id });
+    timeline.push({ id: p.id, start: time, end: time + p.burst_time });
+
+    time += p.burst_time;
+    p.completion_time = time;
+    p.remaining_time = 0;
+    p.turnaround_time = p.completion_time - p.arrival_time;
+    p.waiting_time = p.turnaround_time - p.burst_time;
+    p.status = 'Completed';
+
+    addLogLine(time, `${p.id} completed. WT=${p.waiting_time}, TAT=${p.turnaround_time}.`, 'log-green');
+  });
+
+  // Statistics
+  const totalWT = procs.reduce((s, p) => s + p.waiting_time, 0);
+  const totalTAT = procs.reduce((s, p) => s + p.turnaround_time, 0);
+  const n = procs.length;
+  const totalBurst = procs.reduce((s, p) => s + p.burst_time, 0);
+
+  const stats = {
+    average_waiting_time: totalWT / n,
+    average_turnaround_time: totalTAT / n,
+    cpu_utilization: Math.round((totalBurst / time) * 100),
+    throughput: parseFloat((n / time).toFixed(2))
+  };
+
+  addLogLine(time, `FCFS complete. Avg WT=${stats.average_waiting_time.toFixed(2)}, Avg TAT=${stats.average_turnaround_time.toFixed(2)}.`, 'log-green');
+
+  fcfsResults = {
+    mode: 'fcfs',
+    execution_log,
+    timeline,
+    statistics: stats,
+    requests: procs
+  };
+
+  // Update UI
+  requests = procs;
+  renderTable();
+  renderReadyQueue([]);
+  renderGanttChart(timeline);
+  updateSummaryCards('FCFS', 'Completed');
+  updatePerformanceTable('fcfs', stats);
+  document.getElementById('card-cpu-status').textContent = 'Completed';
+  document.getElementById('card-cpu-status').style.color = '#16a34a';
+  updateComparisonChart();
+}
+
+// =========================================================
+// SCHEDULER: Round Robin
+// =========================================================
+function runRoundRobin() {
+  const quantum = parseInt(document.getElementById('card-time-quantum').textContent) || 2;
+
+  // Deep copy requests
+  const procs = requests.map(r => ({ ...r, remaining_time: r.burst_time, start_time: null, completion_time: null, waiting_time: null, turnaround_time: null, status: 'Waiting' }));
+  procs.sort((a, b) => a.arrival_time - b.arrival_time);
+
+  const execution_log = [];
+  const timeline = [];
+  let time = 0;
+  const queue = [];
+  let completed = 0;
+  const n = procs.length;
+  let arrivalIdx = 0;
+
+  executionLog = [];
+  addLogLine(0, `▶ Starting Round Robin scheduling (Quantum=${quantum})...`, 'log-green');
+
+  // Add initially arrived processes
+  while (arrivalIdx < n && procs[arrivalIdx].arrival_time <= time) {
+    queue.push(procs[arrivalIdx]);
+    addLogLine(procs[arrivalIdx].arrival_time, `Request ${procs[arrivalIdx].id} added to ready queue.`, '');
+    arrivalIdx++;
+  }
+
+  let safetyCounter = 0;
+  const maxIterations = 500;
+
+  while (completed < n && safetyCounter < maxIterations) {
+    safetyCounter++;
+
+    if (queue.length === 0) {
+      // CPU idle, advance to next arrival
+      if (arrivalIdx < n) {
+        const nextArrival = procs[arrivalIdx].arrival_time;
+        timeline.push({ id: 'Idle', start: time, end: nextArrival });
+        addLogLine(time, `CPU idle. Advancing to t=${nextArrival}.`, '');
+        time = nextArrival;
+        while (arrivalIdx < n && procs[arrivalIdx].arrival_time <= time) {
+          queue.push(procs[arrivalIdx]);
+          addLogLine(time, `Request ${procs[arrivalIdx].id} added to ready queue.`, '');
+          arrivalIdx++;
+        }
+      } else {
+        break;
+      }
+      continue;
+    }
+
+    const current = queue.shift();
+    const execTime = Math.min(quantum, current.remaining_time);
+
+    if (current.start_time === null) {
+      current.start_time = time;
+    }
+    current.status = 'Running';
+
+    addLogLine(time, `CPU → Executing ${current.id} for ${execTime} time units.`, 'log-blue');
+    execution_log.push({ time, event: `Executing ${current.id}`, id: current.id });
+    timeline.push({ id: current.id, start: time, end: time + execTime });
+
+    time += execTime;
+    current.remaining_time -= execTime;
+
+    // Add newly arrived processes during this time slice
+    while (arrivalIdx < n && procs[arrivalIdx].arrival_time <= time) {
+      queue.push(procs[arrivalIdx]);
+      addLogLine(procs[arrivalIdx].arrival_time, `Request ${procs[arrivalIdx].id} added to ready queue.`, '');
+      arrivalIdx++;
+    }
+
+    if (current.remaining_time > 0) {
+      current.status = 'Waiting';
+      queue.push(current);
+      addLogLine(time, `Time quantum expired for ${current.id}. Remaining=${current.remaining_time}. Moving to end of queue.`, 'log-orange');
+    } else {
+      current.completion_time = time;
+      current.turnaround_time = current.completion_time - current.arrival_time;
+      current.waiting_time = current.turnaround_time - current.burst_time;
+      current.remaining_time = 0;
+      current.status = 'Completed';
+      completed++;
+      addLogLine(time, `${current.id} completed. WT=${current.waiting_time}, TAT=${current.turnaround_time}.`, 'log-green');
+    }
+  }
+
+  // Statistics
+  const totalWT = procs.reduce((s, p) => s + (p.waiting_time || 0), 0);
+  const totalTAT = procs.reduce((s, p) => s + (p.turnaround_time || 0), 0);
+  const totalBurst = procs.reduce((s, p) => s + p.burst_time, 0);
+
+  const stats = {
+    average_waiting_time: totalWT / n,
+    average_turnaround_time: totalTAT / n,
+    cpu_utilization: Math.round((totalBurst / time) * 100),
+    throughput: parseFloat((n / time).toFixed(2))
+  };
+
+  addLogLine(time, `Round Robin complete. Avg WT=${stats.average_waiting_time.toFixed(2)}, Avg TAT=${stats.average_turnaround_time.toFixed(2)}.`, 'log-green');
+
+  rrResults = {
+    mode: 'round_robin',
+    execution_log,
+    timeline,
+    statistics: stats,
+    requests: procs
+  };
+
+  // Update UI
+  requests = procs;
+  renderTable();
+  renderReadyQueue([]);
+  renderGanttChart(timeline);
+  updateSummaryCards('Round Robin', 'Completed');
+  updatePerformanceTable('rr', stats);
+  document.getElementById('card-cpu-status').textContent = 'Completed';
+  document.getElementById('card-cpu-status').style.color = '#16a34a';
+  updateComparisonChart();
+}
+
+// =========================================================
+// RESET SYSTEM
+// =========================================================
+function resetSystem() {
+  fcfsResults = null;
+  rrResults = null;
+  currentTime = 0;
+  requests = getDefaultRequests();
+  renderTable();
+  renderReadyQueue();
+  renderDefaultLog();
+  renderGanttChart([]);
+  updateSummaryCards('Round Robin', 'Idle');
+  resetPerformanceTable();
+  initComparisonChart();
+  document.getElementById('card-cpu-status').style.color = '';
+}
+
+// =========================================================
+// NAV — active state
+// =========================================================
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+  link.addEventListener('click', function() {
+    document.querySelectorAll('.sidebar-nav a').forEach(l => l.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+// =========================================================
+// BOOT
+// =========================================================
+window.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
