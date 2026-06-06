@@ -187,6 +187,7 @@ body {
   grid-template-columns: repeat(5, 1fr);
   gap: 16px;
   margin-bottom: 18px;
+  scroll-margin-top: 80px;
 }
 .summary-card {
   background: #fff;
@@ -296,6 +297,7 @@ body {
   border: 1px solid #f1f5f9;
   overflow: hidden;
   margin-bottom: 18px;
+  scroll-margin-top: 80px;
 }
 .panel-header {
   padding: 14px 18px;
@@ -442,6 +444,7 @@ body {
 .perf-table tbody tr:last-child td { border-bottom: none; }
 .perf-val-red { color: #ea580c; }
 .perf-val-green { color: #16a34a; }
+.perf-val-purple { color: #7c3aed; }
 
 /* ===== READY QUEUE ===== */
 .ready-queue-container {
@@ -553,6 +556,374 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 .animate-in { animation: fadeInUp 0.4s ease-out; }
+
+/* ===== MEMBER 4: PER-STUDENT STATISTICS TABLE ===== */
+.stats-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+.stats-table thead th {
+  background: #f8fafc;
+  padding: 10px 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #64748b;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  border-bottom: 1px solid #e2e8f0;
+}
+.stats-table tbody td {
+  padding: 9px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  font-weight: 500;
+  color: #334155;
+}
+.stats-table tbody tr:hover { background: #f8fafc; }
+.stats-table tbody tr:last-child td { border-bottom: none; }
+.stats-table .avg-row td {
+  background: #eff6ff;
+  font-weight: 700;
+  color: #1e40af;
+  border-top: 2px solid #2563eb;
+}
+.val-highlight { font-weight: 700; }
+.val-wt { color: #ea580c; }
+.val-tat { color: #7c3aed; }
+.val-rt { color: #0891b2; }
+
+/* ===== MEMBER 4: MULTI-ROW GANTT CHART ===== */
+.gantt-multi-container { padding: 0; }
+.gantt-multi-wrapper { padding: 16px 18px 4px; }
+.section-divider {
+  height: 1px;
+  background: #e2e8f0;
+  margin: 16px 0;
+}
+.algo-section-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e293b;
+  padding: 12px 18px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.algo-section-title.fcfs {
+  background: #fef2f2;
+  border-bottom: 1px solid #fecaca;
+  color: #991b1b;
+}
+.algo-section-title.rr {
+  background: #f5f3ff;
+  border-bottom: 1px solid #ddd6fe;
+  color: #6d28d9;
+}
+.gantt-time-axis {
+  display: flex;
+  margin-left: 80px;
+  margin-bottom: 4px;
+}
+.gantt-time-tick {
+  font-size: 9.5px;
+  color: #94a3b8;
+  font-weight: 600;
+  text-align: center;
+}
+.gantt-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+  height: 28px;
+}
+.gantt-row-label {
+  width: 80px;
+  flex-shrink: 0;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #334155;
+  padding-right: 8px;
+  text-align: right;
+}
+.gantt-row-bar {
+  flex: 1;
+  height: 100%;
+  position: relative;
+  background: #f1f5f9;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.gantt-block {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 700;
+  color: #fff;
+  min-width: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: opacity 0.2s;
+}
+.gantt-block:hover {
+  opacity: 0.85;
+  z-index: 2;
+}
+.gantt-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 12px 0 4px;
+  margin-left: 80px;
+}
+.gantt-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #475569;
+}
+.gantt-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+/* ===== MEMBER 4: COMPARISON DASHBOARD ===== */
+.comparison-dashboard {
+  padding: 18px;
+}
+.comparison-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+.algo-card {
+  border-radius: 12px;
+  padding: 16px;
+  border: 1.5px solid;
+}
+.algo-card.fcfs {
+  background: linear-gradient(135deg, #fef2f2 0%, #fff1f2 100%);
+  border-color: #fecaca;
+}
+.algo-card.rr {
+  background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+  border-color: #ddd6fe;
+}
+.algo-card-title {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.algo-card.fcfs .algo-card-title { color: #dc2626; }
+.algo-card.rr .algo-card-title { color: #7c3aed; }
+.algo-metric {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+.algo-metric:last-child { border-bottom: none; }
+.algo-metric-label {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: #64748b;
+}
+.algo-metric-value {
+  font-size: 15px;
+  font-weight: 800;
+}
+.algo-card.fcfs .algo-metric-value { color: #b91c1c; }
+.algo-card.rr .algo-metric-value { color: #6d28d9; }
+.improvement-bar {
+  background: #f8fafc;
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid #e2e8f0;
+}
+.improvement-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.improvement-icon.positive { background: #dcfce7; }
+.improvement-icon.negative { background: #fee2e2; }
+.improvement-icon.neutral { background: #f1f5f9; }
+.improvement-text { flex: 1; }
+.improvement-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 2px;
+}
+.improvement-detail {
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 500;
+}
+.improvement-pct {
+  font-size: 20px;
+  font-weight: 800;
+  color: #16a34a;
+}
+.improvement-pct.negative { color: #dc2626; }
+
+/* ===== MEMBER 4: FINAL SUMMARY PANEL ===== */
+.final-summary {
+  padding: 20px;
+}
+.summary-winner {
+  border: 2px solid;
+  border-radius: 14px;
+  padding: 18px 20px;
+  text-align: center;
+  margin-bottom: 16px;
+  position: relative;
+  overflow: hidden;
+}
+.summary-winner::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(circle at 50% 0%, rgba(34,197,94,0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+.summary-winner.fcfs {
+  background: linear-gradient(135deg, #fef2f2, #fff1f2);
+  border-color: #fecaca;
+}
+.summary-winner.rr {
+  background: linear-gradient(135deg, #f5f3ff, #ede9fe);
+  border-color: #ddd6fe;
+}
+.summary-winner.tie {
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  border-color: #e2e8f0;
+}
+.winner-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.summary-winner.fcfs .winner-badge { background: #dc2626; }
+.summary-winner.rr .winner-badge { background: #7c3aed; }
+.summary-winner.tie .winner-badge { background: #64748b; }
+
+.winner-name {
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+.summary-winner.fcfs .winner-name { color: #991b1b; }
+.summary-winner.rr .winner-name { color: #5b21b6; }
+.summary-winner.tie .winner-name { color: #334155; }
+
+.winner-reason {
+  font-size: 12px;
+  font-weight: 500;
+}
+.summary-winner.fcfs .winner-reason { color: #b91c1c; }
+.summary-winner.rr .winner-reason { color: #6d28d9; }
+.summary-winner.tie .winner-reason { color: #475569; }
+.summary-insights {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.insight-card {
+  background: #f8fafc;
+  border-radius: 10px;
+  padding: 14px;
+  border: 1px solid #e2e8f0;
+}
+.insight-label {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: 4px;
+}
+.insight-value {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.2;
+}
+.insight-sub {
+  font-size: 10.5px;
+  font-weight: 500;
+  color: #64748b;
+  margin-top: 2px;
+}
+.summary-conclusion {
+  background: #eff6ff;
+  border-radius: 10px;
+  padding: 14px 16px;
+  border-left: 4px solid #2563eb;
+}
+.conclusion-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1e40af;
+  margin-bottom: 4px;
+}
+.conclusion-text {
+  font-size: 12px;
+  color: #334155;
+  font-weight: 500;
+  line-height: 1.6;
+}
+.no-data-msg {
+  text-align: center;
+  padding: 32px 16px;
+  color: #94a3b8;
+  font-size: 13px;
+  font-weight: 500;
+}
+.no-data-msg .no-data-icon {
+  font-size: 32px;
+  display: block;
+  margin-bottom: 8px;
+}
+
+/* ===== MEMBER 4: TURNAROUND CHART ===== */
+.chart-container-tat {
+  padding: 16px;
+  height: 240px;
+  position: relative;
+}
 </style>
 </head>
 <body>
@@ -572,8 +943,6 @@ body {
     <a id="nav-scheduler"><span class="nav-icon">⚙️</span> Scheduler</a>
     <a id="nav-results"><span class="nav-icon">📈</span> Results</a>
     <a id="nav-analytics"><span class="nav-icon">📉</span> Analytics</a>
-    <a id="nav-settings"><span class="nav-icon">🔧</span> Settings</a>
-    <a id="nav-about"><span class="nav-icon">ℹ️</span> About</a>
   </nav>
   <div class="sidebar-status">
     <div class="status-dot"></div>
@@ -758,13 +1127,56 @@ body {
                 </tr>
                 <tr id="perf-rr-row">
                   <td style="font-weight:700;">Round Robin</td>
-                  <td class="perf-val-green" id="perf-rr-awt">—</td>
-                  <td class="perf-val-green" id="perf-rr-att">—</td>
-                  <td class="perf-val-green" id="perf-rr-cpu">—</td>
-                  <td class="perf-val-green" id="perf-rr-tp">—</td>
+                  <td class="perf-val-purple" id="perf-rr-awt">—</td>
+                  <td class="perf-val-purple" id="perf-rr-att">—</td>
+                  <td class="perf-val-purple" id="perf-rr-cpu">—</td>
+                  <td class="perf-val-purple" id="perf-rr-tp">—</td>
                 </tr>
               </tbody>
             </table>
+          </div>
+        </div>
+
+        <!-- MEMBER 4: Per-Student Statistics Table -->
+        <div class="panel animate-in" id="panel-student-stats">
+          <div class="panel-header">
+            <div class="panel-header-left">
+              <span class="panel-icon">📋</span>
+              <span class="panel-title">Per-Student Statistics</span>
+            </div>
+          </div>
+          <div class="panel-body" id="student-stats-panel-body">
+            <div class="no-data-msg"><span class="no-data-icon">📊</span>Run a scheduler to see per-student statistics</div>
+          </div>
+        </div>
+
+        <!-- MEMBER 4: Comparison Dashboard -->
+        <div class="panel animate-in" id="panel-comparison-dashboard">
+          <div class="panel-header">
+            <div class="panel-header-left">
+              <span class="panel-icon">⚖️</span>
+              <span class="panel-title">Algorithm Comparison Dashboard</span>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div id="comparison-dashboard-body">
+              <div class="no-data-msg"><span class="no-data-icon">📉</span>Run both FCFS and Round Robin to see the comparison</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MEMBER 4: Enhanced Multi-Row Gantt Chart -->
+        <div class="panel animate-in" id="panel-gantt-multi">
+          <div class="panel-header">
+            <div class="panel-header-left">
+              <span class="panel-icon">📊</span>
+              <span class="panel-title">Per-Student Gantt Chart</span>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="gantt-multi-container" id="gantt-multi-container">
+              <div class="no-data-msg"><span class="no-data-icon">📊</span>Run a scheduler to see per-student timeline</div>
+            </div>
           </div>
         </div>
 
@@ -815,6 +1227,36 @@ body {
           <div class="panel-body">
             <div class="chart-container">
               <canvas id="comparison-chart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- MEMBER 4: Turnaround Time Comparison Chart -->
+        <div class="panel animate-in" id="panel-tat-chart">
+          <div class="panel-header">
+            <div class="panel-header-left">
+              <span class="panel-icon">📈</span>
+              <span class="panel-title">Turnaround Time Comparison</span>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="chart-container-tat">
+              <canvas id="tat-chart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- MEMBER 4: Final Summary Panel -->
+        <div class="panel animate-in" id="panel-final-summary">
+          <div class="panel-header">
+            <div class="panel-header-left">
+              <span class="panel-icon">🏆</span>
+              <span class="panel-title">Final Summary</span>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div id="final-summary-body">
+              <div class="no-data-msg"><span class="no-data-icon">🏆</span>Run both schedulers to see the final summary</div>
             </div>
           </div>
         </div>
@@ -1075,6 +1517,7 @@ function init() {
   renderGanttChart([]);
   updateSummaryCards();
   initComparisonChart();
+  initTATChart();
 }
 
 // =========================================================
@@ -1273,8 +1716,8 @@ function initComparisonChart() {
         {
           label: 'Round Robin',
           data: requests.map(() => 0),
-          backgroundColor: 'rgba(34, 197, 94, 0.75)',
-          borderColor: '#22c55e',
+          backgroundColor: 'rgba(124, 58, 237, 0.75)',
+          borderColor: '#7c3aed',
           borderWidth: 1,
           borderRadius: 4,
         }
@@ -1370,6 +1813,8 @@ function generateRequests() {
   updateSummaryCards('—', 'Idle');
   resetPerformanceTable();
   initComparisonChart();
+  initTATChart();
+  resetMember4Panels();
 }
 
 function resetPerformanceTable() {
@@ -1641,6 +2086,8 @@ function resetSystem() {
   updateSummaryCards('Round Robin', 'Idle');
   resetPerformanceTable();
   initComparisonChart();
+  initTATChart();
+  resetMember4Panels();
   document.getElementById('card-cpu-status').style.color = '';
 }
 function deleteRequest(id) {
@@ -1674,6 +2121,11 @@ runFCFS = function() {
   document.getElementById('card-cpu-status').textContent = 'Completed';
   document.getElementById('card-cpu-status').style.color = '#16a34a';
   updateComparisonChart();
+  // Member 4: update statistics and visualization
+  updateStudentStatsAndGantt();
+  updateTATChart();
+  renderComparisonDashboard();
+  renderFinalSummary();
 };
 
 runRoundRobin = function() {
@@ -1691,12 +2143,484 @@ runRoundRobin = function() {
   document.getElementById('card-cpu-status').textContent = 'Completed';
   document.getElementById('card-cpu-status').style.color = '#16a34a';
   updateComparisonChart();
+  // Member 4: update statistics and visualization
+  updateStudentStatsAndGantt();
+  updateTATChart();
+  renderComparisonDashboard();
+  renderFinalSummary();
+};
+
+// =========================================================
+// MEMBER 4: STATISTICS AND VISUALIZATION MODULE
+// =========================================================
+
+// --- Turnaround Time Chart (Chart.js) ---
+let tatChart = null;
+
+function initTATChart() {
+  const ctx = document.getElementById('tat-chart').getContext('2d');
+  if (tatChart) tatChart.destroy();
+  if (typeof Chart === 'undefined') {
+    tatChart = null;
+    return;
+  }
+  tatChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: requests.map(r => r.id),
+      datasets: [
+        {
+          label: 'FCFS (Baseline)',
+          data: requests.map(() => 0),
+          backgroundColor: 'rgba(239, 68, 68, 0.65)',
+          borderColor: '#ef4444',
+          borderWidth: 1,
+          borderRadius: 4,
+        },
+        {
+          label: 'Round Robin',
+          data: requests.map(() => 0),
+          backgroundColor: 'rgba(124, 58, 237, 0.65)',
+          borderColor: '#7c3aed',
+          borderWidth: 1,
+          borderRadius: 4,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: {
+            font: { family: 'Inter', size: 11, weight: '600' },
+            usePointStyle: true,
+            pointStyle: 'rectRounded',
+            padding: 14,
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 40,
+          ticks: { font: { family: 'Inter', size: 11 }, color: '#94a3b8' },
+          grid: { color: '#f1f5f9' },
+          title: { display: true, text: 'Turnaround Time', font: { family: 'Inter', size: 11, weight: '600' }, color: '#64748b' }
+        },
+        x: {
+          ticks: { font: { family: 'Inter', size: 11, weight: '600' }, color: '#64748b' },
+          grid: { display: false }
+        }
+      }
+    }
+  });
+}
+
+function updateTATChart() {
+  if (!tatChart) return;
+  const labels = requests.map(r => r.id);
+  const fcfsData = fcfsResults ? fcfsResults.requests.map(r => r.turnaround_time || 0) : requests.map(() => 0);
+  const rrData = rrResults ? rrResults.requests.map(r => r.turnaround_time || 0) : requests.map(() => 0);
+  tatChart.data.labels = labels;
+  tatChart.data.datasets[0].data = fcfsData;
+  tatChart.data.datasets[1].data = rrData;
+  const maxVal = Math.max(...fcfsData, ...rrData, 10);
+  tatChart.options.scales.y.max = Math.ceil(maxVal * 1.3);
+  tatChart.update();
+}
+
+// --- Per-Student Statistics and Gantt Timeline (Combined view for both algorithms) ---
+function updateStudentStatsAndGantt() {
+  const statsBody = document.getElementById('student-stats-panel-body');
+  const ganttContainer = document.getElementById('gantt-multi-container');
+
+  if (!statsBody || !ganttContainer) return;
+
+  statsBody.innerHTML = '';
+  ganttContainer.innerHTML = '';
+
+  const hasFCFS = fcfsResults !== null;
+  const hasRR = rrResults !== null;
+
+  if (!hasFCFS && !hasRR) {
+    statsBody.innerHTML = '<div class="no-data-msg"><span class="no-data-icon">📊</span>Run a scheduler to see per-student statistics</div>';
+    ganttContainer.innerHTML = '<div class="no-data-msg"><span class="no-data-icon">📊</span>Run a scheduler to see per-student timeline</div>';
+    return;
+  }
+
+  // Helper to render stats table for FCFS/RR
+  function createStatsTableHTML(procs, modeName, themeClass) {
+    if (!procs || procs.length === 0) return '';
+    let totalWT = 0, totalTAT = 0, totalRT = 0;
+
+    let rowsHTML = '';
+    procs.forEach(p => {
+      const wt = p.waiting_time != null ? p.waiting_time : 0;
+      const tat = p.turnaround_time != null ? p.turnaround_time : 0;
+      const rt = p.response_time != null ? p.response_time : (p.start_time != null ? p.start_time - p.arrival_time : 0);
+      totalWT += wt;
+      totalTAT += tat;
+      totalRT += rt;
+
+      rowsHTML += `
+        <tr>
+          <td style="font-weight:700;">${p.id}</td>
+          <td>${p.request_type}</td>
+          <td>${p.arrival_time}</td>
+          <td>${p.burst_time}</td>
+          <td>${p.completion_time != null ? p.completion_time : '—'}</td>
+          <td class="val-highlight val-wt">${wt}</td>
+          <td class="val-highlight val-tat">${tat}</td>
+          <td class="val-highlight val-rt">${rt}</td>
+        </tr>
+      `;
+    });
+
+    const n = procs.length;
+    const avgWT = (totalWT / n).toFixed(2);
+    const avgTAT = (totalTAT / n).toFixed(2);
+    const avgRT = (totalRT / n).toFixed(2);
+
+    return `
+      <div class="stats-section">
+        <h3 class="algo-section-title ${themeClass}">${themeClass === 'fcfs' ? '🔴' : '🟣'} ${modeName}</h3>
+        <table class="stats-table">
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th>Type</th>
+              <th>Arrival</th>
+              <th>Burst</th>
+              <th>Completion</th>
+              <th>Waiting Time</th>
+              <th>Turnaround Time</th>
+              <th>Response Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rowsHTML}
+            <tr class="avg-row">
+              <td colspan="5">Averages — ${n} students</td>
+              <td>${avgWT}</td>
+              <td>${avgTAT}</td>
+              <td>${avgRT}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  // Render stats tables
+  if (hasFCFS) {
+    statsBody.innerHTML += createStatsTableHTML(fcfsResults.requests, 'FCFS (Baseline)', 'fcfs');
+  }
+  if (hasRR) {
+    if (hasFCFS) {
+      statsBody.innerHTML += '<div class="section-divider"></div>';
+    }
+    statsBody.innerHTML += createStatsTableHTML(rrResults.requests, 'Round Robin', 'rr');
+  }
+
+  // Helper to render Gantt chart for FCFS/RR
+  function createMultiRowGanttHTML(timeline, procs, modeName, themeClass) {
+    if (!timeline || timeline.length === 0 || !procs || procs.length === 0) return '';
+    const totalTime = Math.max(...timeline.map(s => s.end), 1);
+    const studentIds = procs.map(p => p.id);
+
+    // Time axis ticks
+    let ticksHTML = '';
+    const step = totalTime <= 20 ? 1 : totalTime <= 40 ? 2 : 5;
+    for (let t = 0; t <= totalTime; t += step) {
+      ticksHTML += `<span class="gantt-time-tick" style="width: ${(step / totalTime * 100)}%">${t}</span>`;
+    }
+
+    // Rows
+    let rowsHTML = '';
+    studentIds.forEach((sid, idx) => {
+      let blocksHTML = '';
+      timeline.filter(s => s.id === sid).forEach(seg => {
+        const left = (seg.start / totalTime * 100);
+        const width = ((seg.end - seg.start) / totalTime * 100);
+        const color = GANTT_COLORS[idx % GANTT_COLORS.length];
+        const blockText = ((seg.end - seg.start) / totalTime > 0.06) ? `${seg.start}-${seg.end}` : '';
+        blocksHTML += `
+          <div class="gantt-block" 
+               style="left: ${left}%; width: ${width}%; background: ${color};" 
+               title="${sid}: t=${seg.start} → t=${seg.end} (${seg.end - seg.start} units)">
+            ${blockText}
+          </div>
+        `;
+      });
+
+      rowsHTML += `
+        <div class="gantt-row">
+          <div class="gantt-row-label">${sid}</div>
+          <div class="gantt-row-bar">
+            ${blocksHTML}
+          </div>
+        </div>
+      `;
+    });
+
+    // Legend
+    let legendHTML = '';
+    studentIds.forEach((sid, idx) => {
+      const color = GANTT_COLORS[idx % GANTT_COLORS.length];
+      legendHTML += `
+        <div class="gantt-legend-item">
+          <span class="gantt-legend-dot" style="background:${color}"></span>${sid}
+        </div>
+      `;
+    });
+
+    return `
+      <div class="gantt-section">
+        <h3 class="algo-section-title ${themeClass}">${themeClass === 'fcfs' ? '🔴' : '🟣'} ${modeName} — Execution Timeline</h3>
+        <div class="gantt-multi-wrapper">
+          <div class="gantt-time-axis">
+            ${ticksHTML}
+          </div>
+          ${rowsHTML}
+          <div class="gantt-legend">
+            ${legendHTML}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // Render Gantt charts
+  if (hasFCFS) {
+    ganttContainer.innerHTML += createMultiRowGanttHTML(fcfsResults.timeline, fcfsResults.requests, 'FCFS (Baseline)', 'fcfs');
+  }
+  if (hasRR) {
+    if (hasFCFS) {
+      ganttContainer.innerHTML += '<div class="section-divider"></div>';
+    }
+    ganttContainer.innerHTML += createMultiRowGanttHTML(rrResults.timeline, rrResults.requests, 'Round Robin', 'rr');
+  }
+}
+
+// --- Algorithm Comparison Dashboard ---
+// Side-by-side comparison of FCFS vs Round Robin with improvement metrics
+function renderComparisonDashboard() {
+  const container = document.getElementById('comparison-dashboard-body');
+
+  if (!fcfsResults || !rrResults) {
+    container.innerHTML = '<div class="no-data-msg"><span class="no-data-icon">📉</span>Run both FCFS and Round Robin to see the comparison</div>';
+    return;
+  }
+
+  const fs = fcfsResults.statistics;
+  const rs = rrResults.statistics;
+
+  // Calculate improvement percentages
+  const wtImprovement = fs.average_waiting_time > 0
+    ? ((fs.average_waiting_time - rs.average_waiting_time) / fs.average_waiting_time * 100)
+    : 0;
+  const tatImprovement = fs.average_turnaround_time > 0
+    ? ((fs.average_turnaround_time - rs.average_turnaround_time) / fs.average_turnaround_time * 100)
+    : 0;
+
+  const wtBetter = wtImprovement > 0;
+  const tatBetter = tatImprovement > 0;
+
+  container.innerHTML = `
+    <div class="comparison-dashboard">
+      <div class="comparison-grid">
+        <div class="algo-card fcfs">
+          <div class="algo-card-title">🔴 FCFS (Baseline)</div>
+          <div class="algo-metric">
+            <span class="algo-metric-label">Avg Waiting Time</span>
+            <span class="algo-metric-value">${fs.average_waiting_time.toFixed(2)}</span>
+          </div>
+          <div class="algo-metric">
+            <span class="algo-metric-label">Avg Turnaround Time</span>
+            <span class="algo-metric-value">${fs.average_turnaround_time.toFixed(2)}</span>
+          </div>
+          <div class="algo-metric">
+            <span class="algo-metric-label">CPU Utilization</span>
+            <span class="algo-metric-value">${fs.cpu_utilization}%</span>
+          </div>
+          <div class="algo-metric">
+            <span class="algo-metric-label">Throughput</span>
+            <span class="algo-metric-value">${fs.throughput.toFixed(2)}</span>
+          </div>
+        </div>
+        <div class="algo-card rr">
+          <div class="algo-card-title">🟣 Round Robin</div>
+          <div class="algo-metric">
+            <span class="algo-metric-label">Avg Waiting Time</span>
+            <span class="algo-metric-value">${rs.average_waiting_time.toFixed(2)}</span>
+          </div>
+          <div class="algo-metric">
+            <span class="algo-metric-label">Avg Turnaround Time</span>
+            <span class="algo-metric-value">${rs.average_turnaround_time.toFixed(2)}</span>
+          </div>
+          <div class="algo-metric">
+            <span class="algo-metric-label">CPU Utilization</span>
+            <span class="algo-metric-value">${rs.cpu_utilization}%</span>
+          </div>
+          <div class="algo-metric">
+            <span class="algo-metric-label">Throughput</span>
+            <span class="algo-metric-value">${rs.throughput.toFixed(2)}</span>
+          </div>
+        </div>
+      </div>
+      <div class="improvement-bar">
+        <div class="improvement-icon ${wtBetter ? 'positive' : (wtImprovement < 0 ? 'negative' : 'neutral')}">${wtBetter ? '📉' : '📈'}</div>
+        <div class="improvement-text">
+          <div class="improvement-title">Waiting Time ${wtBetter ? 'Improvement' : 'Change'}</div>
+          <div class="improvement-detail">Round Robin vs FCFS Baseline</div>
+        </div>
+        <div class="improvement-pct ${wtBetter ? '' : 'negative'}">${wtImprovement >= 0 ? '+' : ''}${wtImprovement.toFixed(1)}%</div>
+      </div>
+      <div style="height:10px;"></div>
+      <div class="improvement-bar">
+        <div class="improvement-icon ${tatBetter ? 'positive' : (tatImprovement < 0 ? 'negative' : 'neutral')}">${tatBetter ? '⚡' : '🐢'}</div>
+        <div class="improvement-text">
+          <div class="improvement-title">Turnaround Time ${tatBetter ? 'Improvement' : 'Change'}</div>
+          <div class="improvement-detail">Round Robin vs FCFS Baseline</div>
+        </div>
+        <div class="improvement-pct ${tatBetter ? '' : 'negative'}">${tatImprovement >= 0 ? '+' : ''}${tatImprovement.toFixed(1)}%</div>
+      </div>
+    </div>
+  `;
+}
+
+// --- Final Summary Panel ---
+// Determines winner algorithm and displays conclusion with key insights
+function renderFinalSummary() {
+  const container = document.getElementById('final-summary-body');
+
+  if (!fcfsResults || !rrResults) {
+    container.innerHTML = '<div class="no-data-msg"><span class="no-data-icon">🏆</span>Run both schedulers to see the final summary</div>';
+    return;
+  }
+
+  const fs = fcfsResults.statistics;
+  const rs = rrResults.statistics;
+
+  // Determine winner based on average waiting time (primary) and turnaround time (secondary)
+  let winnerName, winnerReason;
+  const wtDiff = fs.average_waiting_time - rs.average_waiting_time;
+  const tatDiff = fs.average_turnaround_time - rs.average_turnaround_time;
+
+  if (Math.abs(wtDiff) < 0.01 && Math.abs(tatDiff) < 0.01) {
+    winnerName = 'Tie — Both Equal';
+    winnerReason = 'Both algorithms produced identical results for this workload.';
+  } else if (wtDiff > 0) {
+    winnerName = 'Round Robin';
+    winnerReason = `Lower average waiting time by ${wtDiff.toFixed(2)} time units.`;
+  } else if (wtDiff < 0) {
+    winnerName = 'FCFS (Baseline)';
+    winnerReason = `Lower average waiting time by ${Math.abs(wtDiff).toFixed(2)} time units.`;
+  } else {
+    // WT tied, use TAT
+    winnerName = tatDiff > 0 ? 'Round Robin' : 'FCFS (Baseline)';
+    winnerReason = `Equal waiting time, but better turnaround time by ${Math.abs(tatDiff).toFixed(2)} time units.`;
+  }
+
+  const totalRequests = fcfsResults.requests.length;
+  const totalBurst = fcfsResults.requests.reduce((s, p) => s + p.burst_time, 0);
+  const wtImprovement = fs.average_waiting_time > 0
+    ? ((fs.average_waiting_time - rs.average_waiting_time) / fs.average_waiting_time * 100).toFixed(1)
+    : '0.0';
+
+  const winnerClass = winnerName === 'Round Robin' ? 'rr' : (winnerName === 'FCFS (Baseline)' ? 'fcfs' : 'tie');
+
+  container.innerHTML = `
+    <div class="final-summary">
+      <div class="summary-winner ${winnerClass}">
+        <div class="winner-badge">🏆 Winner</div>
+        <div class="winner-name">${winnerName}</div>
+        <div class="winner-reason">${winnerReason}</div>
+      </div>
+      <div class="summary-insights">
+        <div class="insight-card">
+          <div class="insight-label">Total Requests</div>
+          <div class="insight-value">${totalRequests}</div>
+          <div class="insight-sub">Student requests processed</div>
+        </div>
+        <div class="insight-card">
+          <div class="insight-label">Total CPU Work</div>
+          <div class="insight-value">${totalBurst}</div>
+          <div class="insight-sub">Time units of burst</div>
+        </div>
+        <div class="insight-card">
+          <div class="insight-label">WT Improvement</div>
+          <div class="insight-value" style="color:${parseFloat(wtImprovement) >= 0 ? '#16a34a' : '#dc2626'}">${parseFloat(wtImprovement) >= 0 ? '+' : ''}${wtImprovement}%</div>
+          <div class="insight-sub">RR vs FCFS waiting time</div>
+        </div>
+        <div class="insight-card">
+          <div class="insight-label">Best CPU Util.</div>
+          <div class="insight-value">${Math.max(fs.cpu_utilization, rs.cpu_utilization)}%</div>
+          <div class="insight-sub">${fs.cpu_utilization >= rs.cpu_utilization ? 'FCFS' : 'Round Robin'}</div>
+        </div>
+      </div>
+      <div class="summary-conclusion">
+        <div class="conclusion-title">📝 OS Scheduling Conclusion</div>
+        <div class="conclusion-text" style="padding-top: 8px;">
+          <ul style="list-style-type: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px;">
+            <li style="display: flex; align-items: flex-start; gap: 8px;">
+              <span style="color: #2563eb; font-size: 14px; line-height: 1.2;">•</span>
+              <span>For this workload of <strong>${totalRequests} student requests</strong>, <strong>${winnerName}</strong> performed better overall.</span>
+            </li>
+            <li style="display: flex; align-items: flex-start; gap: 8px;">
+              <span style="color: #dc2626; font-size: 14px; line-height: 1.2;">•</span>
+              <span><strong>FCFS (Baseline)</strong> — Avg Waiting Time: <strong>${fs.average_waiting_time.toFixed(2)}</strong></span>
+            </li>
+            <li style="display: flex; align-items: flex-start; gap: 8px;">
+              <span style="color: #dc2626; font-size: 14px; line-height: 1.2;">•</span>
+              <span><strong>FCFS (Baseline)</strong> — Avg Turnaround Time: <strong>${fs.average_turnaround_time.toFixed(2)}</strong></span>
+            </li>
+            <li style="display: flex; align-items: flex-start; gap: 8px;">
+              <span style="color: #7c3aed; font-size: 14px; line-height: 1.2;">•</span>
+              <span><strong>Round Robin</strong> — Avg Waiting Time: <strong>${rs.average_waiting_time.toFixed(2)}</strong></span>
+            </li>
+            <li style="display: flex; align-items: flex-start; gap: 8px;">
+              <span style="color: #7c3aed; font-size: 14px; line-height: 1.2;">•</span>
+              <span><strong>Round Robin</strong> — Avg Turnaround Time: <strong>${rs.average_turnaround_time.toFixed(2)}</strong></span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// --- Reset Member 4 Panels ---
+function resetMember4Panels() {
+  updateStudentStatsAndGantt();
+  document.getElementById('comparison-dashboard-body').innerHTML =
+    '<div class="no-data-msg"><span class="no-data-icon">📉</span>Run both FCFS and Round Robin to see the comparison</div>';
+  document.getElementById('final-summary-body').innerHTML =
+    '<div class="no-data-msg"><span class="no-data-icon">🏆</span>Run both schedulers to see the final summary</div>';
+}
+
+const navMappings = {
+  'nav-dashboard': 'summary-cards',
+  'nav-requests': 'panel-requests',
+  'nav-scheduler': 'panel-gantt',
+  'nav-results': 'panel-performance',
+  'nav-analytics': 'panel-chart'
 };
 
 document.querySelectorAll('.sidebar-nav a').forEach(link => {
   link.addEventListener('click', function() {
     document.querySelectorAll('.sidebar-nav a').forEach(l => l.classList.remove('active'));
     this.classList.add('active');
+    
+    const targetId = navMappings[this.id];
+    if (targetId) {
+      const targetEl = document.getElementById(targetId);
+      if (targetEl) {
+        targetEl.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
   });
 });
 
