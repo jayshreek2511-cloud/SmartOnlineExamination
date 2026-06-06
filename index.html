@@ -225,6 +225,20 @@ body {
   font-size: 26px; font-weight: 800; color: #0f172a;
   line-height: 1.1;
 }
+.quantum-input {
+  width: 72px;
+  height: 34px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  color: #0f172a;
+  font: 800 22px/1 'Inter', sans-serif;
+  text-align: center;
+  background: #fff;
+}
+.quantum-input:focus {
+  outline: 2px solid rgba(37, 99, 235, 0.2);
+  border-color: #2563eb;
+}
 .card-value.green-text { color: #16a34a; }
 .card-subtitle {
   font-size: 11px; font-weight: 500;
@@ -265,6 +279,7 @@ body {
 .btn-fcfs { background: linear-gradient(135deg, #16a34a, #22c55e); }
 .btn-rr { background: linear-gradient(135deg, #7c3aed, #8b5cf6); }
 .btn-reset { background: linear-gradient(135deg, #dc2626, #ef4444); }
+.btn-add { background: linear-gradient(135deg, #0891b2, #06b6d4); }
 
 /* ===== TWO COLUMN LAYOUT ===== */
 .main-grid {
@@ -628,7 +643,7 @@ body {
         <div class="card-icon cyan">⏱️</div>
         <div class="card-info">
           <div class="card-label">Time Quantum</div>
-          <div class="card-value" id="card-time-quantum">2</div>
+          <input class="quantum-input" id="quantum-input" type="number" min="1" max="20" value="2" aria-label="Round Robin time quantum">
           <div class="card-subtitle cyan">Time Units</div>
         </div>
       </div>
@@ -656,7 +671,11 @@ body {
       <button class="action-btn btn-reset" id="btn-reset" onclick="resetSystem()">
         <span>↺</span> Reset System
       </button>
-    </section>
+    
+    <button class="action-btn btn-add" id="btn-add" onclick="addRequest()">
+    Add Request
+</button>
+</section>
 
     <!-- MAIN GRID -->
     <div class="main-grid">
@@ -686,6 +705,7 @@ body {
                   <th>Burst Time</th>
                   <th>Remaining Time</th>
                   <th>Status</th>
+                  <th>Action</th>
                 </tr>
               </thead>
               <tbody id="requests-tbody"></tbody>
@@ -837,6 +857,212 @@ let rrResults = null;
 let comparisonChart = null;
 let executionLog = [];
 let currentTime = 0;
+const DEFAULT_TIME_QUANTUM = 2;
+
+function createSchedulerRequest(request) {
+  return {
+    ...request,
+    arrival_time: Number(request.arrival_time),
+    burst_time: Number(request.burst_time),
+    remaining_time: Number(request.burst_time),
+    start_time: null,
+    completion_time: null,
+    waiting_time: null,
+    turnaround_time: null,
+    response_time: null,
+    status: 'Waiting'
+  };
+}
+
+function getQueueSnapshot(queue) {
+  return queue.map(request => request.id);
+}
+
+function buildStatistics(processes, finishTime) {
+  const count = processes.length;
+  const totalBurst = processes.reduce((sum, request) => sum + request.burst_time, 0);
+  const totalWaitingTime = processes.reduce((sum, request) => sum + request.waiting_time, 0);
+  const totalTurnaroundTime = processes.reduce((sum, request) => sum + request.turnaround_time, 0);
+  const safeFinishTime = Math.max(finishTime, 1);
+
+  return {
+    average_waiting_time: count ? totalWaitingTime / count : 0,
+    average_turnaround_time: count ? totalTurnaroundTime / count : 0,
+    cpu_utilization: Math.round((totalBurst / safeFinishTime) * 100),
+    throughput: count ? parseFloat((count / safeFinishTime).toFixed(2)) : 0
+  };
+}
+
+function buildSchedulerResult(mode, processes, execution_log, timeline, finishTime) {
+  const statistics = buildStatistics(processes, finishTime);
+
+  return {
+    mode,
+    execution_log,
+    timeline,
+    gantt_timeline: timeline,
+    statistics,
+    requests: processes,
+    final_request_list: processes
+  };
+}
+
+function addExecutionEvent(execution_log, time, event, request, queue, extra = {}) {
+  execution_log.push({
+    time,
+    event,
+    id: request ? request.id : null,
+    remaining_time: request ? request.remaining_time : null,
+    queue_snapshot: queue ? getQueueSnapshot(queue) : [],
+    ...extra
+  });
+}
+
+function runFCFSScheduler(inputRequests, logger = () => {}) {
+  const processes = inputRequests
+    .map(createSchedulerRequest)
+    .sort((a, b) => a.arrival_time - b.arrival_time || a.id.localeCompare(b.id));
+
+  const execution_log = [];
+  const timeline = [];
+  let time = 0;
+
+  logger(0, 'Starting FCFS (Baseline) scheduling...', 'log-green');
+
+  processes.forEach(request => {
+    if (time < request.arrival_time) {
+      timeline.push({ id: 'Idle', start: time, end: request.arrival_time });
+      addExecutionEvent(execution_log, time, 'CPU idle', null, [], { start: time, end: request.arrival_time });
+      logger(time, `CPU idle. Waiting for ${request.id} (arrives at t=${request.arrival_time}).`, '');
+      time = request.arrival_time;
+    }
+
+    request.start_time = time;
+    request.response_time = request.start_time - request.arrival_time;
+    request.status = 'Running';
+
+    timeline.push({ id: request.id, start: time, end: time + request.burst_time });
+    addExecutionEvent(execution_log, time, `Executing ${request.id}`, request, [], {
+      request_type: request.request_type,
+      start: time,
+      end: time + request.burst_time
+    });
+    logger(time, `CPU executing ${request.id} (${request.request_type}) for ${request.burst_time} time units.`, 'log-blue');
+
+    time += request.burst_time;
+    request.completion_time = time;
+    request.remaining_time = 0;
+    request.turnaround_time = request.completion_time - request.arrival_time;
+    request.waiting_time = request.turnaround_time - request.burst_time;
+    request.status = 'Completed';
+
+    addExecutionEvent(execution_log, time, `${request.id} completed`, request, [], {
+      waiting_time: request.waiting_time,
+      turnaround_time: request.turnaround_time
+    });
+    logger(time, `${request.id} completed. WT=${request.waiting_time}, TAT=${request.turnaround_time}.`, 'log-green');
+  });
+
+  const result = buildSchedulerResult('fcfs', processes, execution_log, timeline, time);
+  logger(time, `FCFS complete. Avg WT=${result.statistics.average_waiting_time.toFixed(2)}, Avg TAT=${result.statistics.average_turnaround_time.toFixed(2)}.`, 'log-green');
+  return result;
+}
+
+function runRoundRobinScheduler(inputRequests, quantum, logger = () => {}) {
+  const processes = inputRequests
+    .map(createSchedulerRequest)
+    .sort((a, b) => a.arrival_time - b.arrival_time || a.id.localeCompare(b.id));
+
+  const execution_log = [];
+  const timeline = [];
+  const queue = [];
+  let time = 0;
+  let completed = 0;
+  let arrivalIndex = 0;
+
+  logger(0, `Starting Round Robin scheduling (Quantum=${quantum})...`, 'log-green');
+
+  while (completed < processes.length) {
+    while (arrivalIndex < processes.length && processes[arrivalIndex].arrival_time <= time) {
+      queue.push(processes[arrivalIndex]);
+      addExecutionEvent(execution_log, processes[arrivalIndex].arrival_time, `${processes[arrivalIndex].id} joined ready queue`, processes[arrivalIndex], queue);
+      logger(processes[arrivalIndex].arrival_time, `Request ${processes[arrivalIndex].id} added to ready queue.`, '');
+      arrivalIndex++;
+    }
+
+    if (queue.length === 0) {
+      const nextArrival = processes[arrivalIndex].arrival_time;
+      timeline.push({ id: 'Idle', start: time, end: nextArrival });
+      addExecutionEvent(execution_log, time, 'CPU idle', null, queue, { start: time, end: nextArrival });
+      logger(time, `CPU idle. Advancing to t=${nextArrival}.`, '');
+      time = nextArrival;
+      continue;
+    }
+
+    const current = queue.shift();
+    const executionTime = Math.min(quantum, current.remaining_time);
+
+    if (current.start_time === null) {
+      current.start_time = time;
+      current.response_time = current.start_time - current.arrival_time;
+    }
+
+    current.status = 'Running';
+    timeline.push({ id: current.id, start: time, end: time + executionTime });
+    addExecutionEvent(execution_log, time, `Executing ${current.id}`, current, queue, {
+      request_type: current.request_type,
+      start: time,
+      end: time + executionTime,
+      quantum
+    });
+    logger(time, `CPU executing ${current.id} for ${executionTime} time units.`, 'log-blue');
+
+    time += executionTime;
+    current.remaining_time -= executionTime;
+
+    while (arrivalIndex < processes.length && processes[arrivalIndex].arrival_time <= time) {
+      queue.push(processes[arrivalIndex]);
+      addExecutionEvent(execution_log, processes[arrivalIndex].arrival_time, `${processes[arrivalIndex].id} joined ready queue`, processes[arrivalIndex], queue);
+      logger(processes[arrivalIndex].arrival_time, `Request ${processes[arrivalIndex].id} added to ready queue.`, '');
+      arrivalIndex++;
+    }
+
+    if (current.remaining_time > 0) {
+      current.status = 'Waiting';
+      queue.push(current);
+      addExecutionEvent(execution_log, time, `${current.id} rotated to end of queue`, current, queue, { quantum });
+      logger(time, `Time quantum expired for ${current.id}. Remaining=${current.remaining_time}. Moving to end of queue.`, 'log-orange');
+    } else {
+      current.completion_time = time;
+      current.turnaround_time = current.completion_time - current.arrival_time;
+      current.waiting_time = current.turnaround_time - current.burst_time;
+      current.remaining_time = 0;
+      current.status = 'Completed';
+      completed++;
+      addExecutionEvent(execution_log, time, `${current.id} completed`, current, queue, {
+        waiting_time: current.waiting_time,
+        turnaround_time: current.turnaround_time
+      });
+      logger(time, `${current.id} completed. WT=${current.waiting_time}, TAT=${current.turnaround_time}.`, 'log-green');
+    }
+  }
+
+  const result = buildSchedulerResult('round_robin', processes, execution_log, timeline, time);
+  logger(time, `Round Robin complete. Avg WT=${result.statistics.average_waiting_time.toFixed(2)}, Avg TAT=${result.statistics.average_turnaround_time.toFixed(2)}.`, 'log-green');
+  return result;
+}
+
+function getQuantumValue() {
+  const input = document.getElementById('quantum-input');
+  const value = Number.parseInt(input?.value, 10);
+
+  if (!Number.isInteger(value) || value < 1) {
+    if (input) input.value = DEFAULT_TIME_QUANTUM;
+    return DEFAULT_TIME_QUANTUM;
+  }
+
+  return value;
+}
 
 // =========================================================
 // INITIALIZATION
@@ -868,6 +1094,10 @@ function renderTable() {
       <td>${r.burst_time}</td>
       <td>${r.remaining_time}</td>
       <td><span class="status-badge ${r.status.toLowerCase()}">${r.status}</span></td>
+      <td>
+<button onclick="editRequest('${r.id}')">Edit</button>
+<button onclick="deleteRequest('${r.id}')">Delete</button>
+</td>
     `;
     tbody.appendChild(tr);
   });
@@ -993,8 +1223,8 @@ function renderGanttChart(timeline) {
     const width = ((seg.end - seg.start) / totalTime) * 100;
     const div = document.createElement('div');
     div.className = 'gantt-segment';
-    const idx = parseInt(seg.id.replace('S', '')) - 1;
-    div.style.background = GANTT_COLORS[idx % GANTT_COLORS.length];
+    const idx = parseInt(String(seg.id).replace('S', '')) - 1;
+    div.style.background = Number.isNaN(idx) ? '#cbd5e1' : GANTT_COLORS[idx % GANTT_COLORS.length];
     div.style.width = width + '%';
     div.textContent = seg.id;
     div.title = `${seg.id}: ${seg.start} → ${seg.end}`;
@@ -1019,6 +1249,13 @@ function updatePerformanceTable(algo, stats) {
 function initComparisonChart() {
   const ctx = document.getElementById('comparison-chart').getContext('2d');
   if (comparisonChart) comparisonChart.destroy();
+  if (typeof Chart === 'undefined') {
+    comparisonChart = null;
+    ctx.font = '600 13px Inter, sans-serif';
+    ctx.fillStyle = '#64748b';
+    ctx.fillText('Chart.js unavailable. Scheduler results are shown in the table.', 12, 32);
+    return;
+  }
 
   comparisonChart = new Chart(ctx, {
     type: 'bar',
@@ -1339,7 +1576,56 @@ function runRoundRobin() {
   document.getElementById('card-cpu-status').style.color = '#16a34a';
   updateComparisonChart();
 }
+function addRequest() {
+    const newId = 'S' + (requests.length + 1);
 
+    const req = {
+        id: newId,
+        student_name: 'Student ' + (requests.length + 1),
+        request_type: REQUEST_TYPES[Math.floor(Math.random() * REQUEST_TYPES.length)],
+        arrival_time: Math.floor(Math.random() * 10),
+        burst_time: Math.floor(Math.random() * 9) + 1,
+        remaining_time: 0,
+        start_time: null,
+        completion_time: null,
+        waiting_time: null,
+        turnaround_time: null,
+        status: 'Waiting'
+    };
+
+    req.remaining_time = req.burst_time;
+
+    requests.push(req);
+    requests.sort((a, b) => a.arrival_time - b.arrival_time);
+
+    renderTable();
+    renderReadyQueue();
+
+    updateSummaryCards(
+        document.getElementById('card-mode')?.textContent || '-',
+        document.getElementById('card-cpu-status')?.textContent || 'Idle'
+    );
+}
+function editRequest(id) {
+  const req = requests.find(r => r.id === id);
+
+if (!req) return;
+const newBurst = prompt("Enter new burst time:", req.burst_time);
+const newArrival = prompt("Enter new arrival time:", req.arrival_time);
+if (newBurst !== null) {
+  if (parseInt(newBurst) < 0) {
+    alert("Burst time cannot be negative!");
+    return;
+}
+    req.burst_time = parseInt(newBurst);
+    req.remaining_time = req.burst_time;
+    req.arrival_time = parseInt(newArrival);
+
+    requests.sort((a, b) => a.arrival_time - b.arrival_time);
+    renderTable();
+    renderReadyQueue();
+}
+}
 // =========================================================
 // RESET SYSTEM
 // =========================================================
@@ -1357,10 +1643,56 @@ function resetSystem() {
   initComparisonChart();
   document.getElementById('card-cpu-status').style.color = '';
 }
+function deleteRequest(id) {
+    requests = requests.filter(r => r.id !== id);
+
+    renderTable();
+    renderReadyQueue();
+
+    updateSummaryCards(
+        document.getElementById('card-mode')?.textContent || '',
+        document.getElementById('card-cpu-status')?.textContent || 'Idle'
+    );
+}
 
 // =========================================================
 // NAV — active state
 // =========================================================
+// =========================================================
+// MEMBER 3 INTEGRATION: UI wrappers for the scheduling engine
+// =========================================================
+runFCFS = function() {
+  executionLog = [];
+  fcfsResults = runFCFSScheduler(requests, addLogLine);
+  requests = fcfsResults.requests.map(request => ({ ...request }));
+
+  renderTable();
+  renderReadyQueue([]);
+  renderGanttChart(fcfsResults.timeline);
+  updateSummaryCards('FCFS', 'Completed');
+  updatePerformanceTable('fcfs', fcfsResults.statistics);
+  document.getElementById('card-cpu-status').textContent = 'Completed';
+  document.getElementById('card-cpu-status').style.color = '#16a34a';
+  updateComparisonChart();
+};
+
+runRoundRobin = function() {
+  const quantum = getQuantumValue();
+
+  executionLog = [];
+  rrResults = runRoundRobinScheduler(requests, quantum, addLogLine);
+  requests = rrResults.requests.map(request => ({ ...request }));
+
+  renderTable();
+  renderReadyQueue([]);
+  renderGanttChart(rrResults.timeline);
+  updateSummaryCards('Round Robin', 'Completed');
+  updatePerformanceTable('rr', rrResults.statistics);
+  document.getElementById('card-cpu-status').textContent = 'Completed';
+  document.getElementById('card-cpu-status').style.color = '#16a34a';
+  updateComparisonChart();
+};
+
 document.querySelectorAll('.sidebar-nav a').forEach(link => {
   link.addEventListener('click', function() {
     document.querySelectorAll('.sidebar-nav a').forEach(l => l.classList.remove('active'));
