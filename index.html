@@ -2053,23 +2053,49 @@ function addRequest() {
 }
 function editRequest(id) {
   const req = requests.find(r => r.id === id);
+  if (!req) return;
 
-if (!req) return;
-const newBurst = prompt("Enter new burst time:", req.burst_time);
-const newArrival = prompt("Enter new arrival time:", req.arrival_time);
-if (newBurst !== null) {
-  if (parseInt(newBurst) < 0) {
-    alert("Burst time cannot be negative!");
+  const newBurstInput = prompt(`Edit Burst Time for ${id}:`, req.burst_time);
+  if (newBurstInput === null) return; // User cancelled
+  
+  const burstVal = parseInt(newBurstInput, 10);
+  if (isNaN(burstVal) || burstVal < 1) {
+    alert("Burst time must be a positive integer!");
     return;
-}
-    req.burst_time = parseInt(newBurst);
-    req.remaining_time = req.burst_time;
-    req.arrival_time = parseInt(newArrival);
+  }
 
-    requests.sort((a, b) => a.arrival_time - b.arrival_time);
-    renderTable();
-    renderReadyQueue();
-}
+  const newArrivalInput = prompt(`Edit Arrival Time for ${id}:`, req.arrival_time);
+  if (newArrivalInput === null) return; // User cancelled
+
+  const arrivalVal = parseInt(newArrivalInput, 10);
+  if (isNaN(arrivalVal) || arrivalVal < 0) {
+    alert("Arrival time must be a non-negative integer!");
+    return;
+  }
+
+  // Update request values
+  req.burst_time = burstVal;
+  req.remaining_time = burstVal;
+  req.arrival_time = arrivalVal;
+
+  // Sort requests by arrival time
+  requests.sort((a, b) => a.arrival_time - b.arrival_time);
+
+  // Reset scheduler results since input data has changed
+  fcfsResults = null;
+  rrResults = null;
+  executionLog = [];
+  
+  // Update UI to initial state
+  renderTable();
+  renderReadyQueue();
+  renderGanttChart([]);
+  updateSummaryCards('—', 'Idle');
+  resetPerformanceTable();
+  initComparisonChart();
+  initTATChart();
+  resetMember4Panels();
+  addLogLine(0, `Request ${id} updated: Burst=${burstVal}, Arrival=${arrivalVal}. Resetting system.`, 'log-blue');
 }
 // =========================================================
 // RESET SYSTEM
